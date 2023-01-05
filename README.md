@@ -17,7 +17,9 @@ export of a base64 string. Then you can import that.
 Instead of:
 
 ```ts
-const wasmBytes = await fetch("https://esm.sh/yoga-wasm-web/dist/yoga.wasm")
+const wasmBytes = await fetch(
+  "https://unpkg.com/yoga-wasm-web/dist/yoga.wasm",
+)
   .then((r) => r.arrayBuffer());
 ```
 
@@ -27,11 +29,9 @@ runtime,
 You can now instead do:
 
 ```ts
-import base64String, {
-  toUint8Array,
-} from "https://importable.deno.land/https://esm.sh/yoga-wasm-web/dist/yoga.wasm";
-
-const wasmBytes = toUint8Array(base64String);
+import base64String from "https://importable.deno.land/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm";
+import { decode } from "https://deno.land/std/encoding/base64.ts";
+const wasmBytes = decode(base64String);
 ```
 
 ...which will be part of the static import structure, and cached along with
@@ -41,11 +41,11 @@ other imports.
 
 The URL must be a valid `https` URL, and from one of the following domains:
 
-- [`https://esm.sh`](https://esm.sh)
-- [`https://cdn.skypack.dev`](https://cdn.skypack.dev)
 - [`https://unpkg.com`](https://unpkg.com)
-- [`https://jspm.dev`](https://jspm.dev)
+- [`https://esm.sh`](https://esm.sh)
 - [`https://cdn.jsdelivr.net`](https://cdn.jsdelivr.net)
+- [`https://cdn.skypack.dev`](https://cdn.skypack.dev)
+- [`https://jspm.dev`](https://jspm.dev)
 - [`https://deno.land`](https://deno.land)
 - [`https://raw.githubusercontent.com`](https://raw.githubusercontent.com)
 

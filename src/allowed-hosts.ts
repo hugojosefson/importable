@@ -1,9 +1,9 @@
 export const ALLOWED_HOSTS: string[] = [
-  "esm.sh",
-  "cdn.skypack.dev",
   "unpkg.com",
-  "jspm.dev",
+  "esm.sh",
   "cdn.jsdelivr.net",
+  "cdn.skypack.dev",
+  "jspm.dev",
   "deno.land",
   "raw.githubusercontent.com",
 ];
