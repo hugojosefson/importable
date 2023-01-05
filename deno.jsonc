@@ -1,6 +1,6 @@
 {
   "tasks": {
     "dev": "deno run --allow-net --allow-env=PORT --watch main.ts",
-    "deploy": "deployctl deploy --no-static --project=title ./main.ts"
+    "deploy": "deployctl deploy --no-static --project=importable ./main.ts"
   }
 }
