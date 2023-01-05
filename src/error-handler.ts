@@ -3,11 +3,13 @@ function isResponse(err: unknown): err is Response {
 }
 
 export async function errorHandler(error: unknown): Promise<Response> {
-  const possiblyResponse = await error;
-  if (isResponse(possiblyResponse)) {
-    return possiblyResponse;
+  try {
+    const possiblyResponse = await error;
+    if (isResponse(possiblyResponse)) {
+      return possiblyResponse;
+    }
+  } catch (error) {
+    console.error(`Error handling error:`, error);
   }
-
-  console.error(error);
   return new Response("Internal Server Error", { status: 500 });
 }

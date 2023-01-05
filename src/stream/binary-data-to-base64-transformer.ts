@@ -1,11 +1,17 @@
+const decoder = new TextDecoder();
 const encoder = new TextEncoder();
-export const binaryDataToBase64Transformer: Transformer<
+
+export class BinaryDataToBase64Transformer extends TransformStream<
   BufferSource,
   Uint8Array
-> = {
-  transform(chunk, controller) {
-    const base64 = btoa(new TextDecoder().decode(chunk));
-    const bytes = encoder.encode(base64);
-    controller.enqueue(bytes);
-  },
-};
+> {
+  constructor() {
+    super({
+      transform: (chunk, controller) => {
+        const base64 = btoa(decoder.decode(chunk));
+        const bytes = encoder.encode(base64);
+        controller.enqueue(bytes);
+      },
+    });
+  }
+}

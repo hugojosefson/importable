@@ -6,9 +6,3 @@ export const RESPONSE_HEADERS_TO_FORWARD: string[] = [
   "expires",
   "date",
 ];
-export const RESPONSE_HEADERS_TO_FORWARD_ON_ERROR: string[] = [
-  ...RESPONSE_HEADERS_TO_FORWARD,
-  "content-length",
-  "content-encoding",
-  "content-type",
-];

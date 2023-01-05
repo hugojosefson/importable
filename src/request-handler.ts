@@ -1,12 +1,9 @@
 import { filterHeaders } from "./fn.ts";
-import {
-  getDesiredChunkSizeTransformer,
-  readerWithDesiredChunkSize,
-} from "./stream/reader-with-desired-chunk-size.ts";
-import { binaryDataToBase64Transformer } from "./stream/binary-data-to-base64-transformer.ts";
 import { RESPONSE_HEADERS_TO_FORWARD } from "./allowed-response-headers-to-forward.ts";
 import { fetchUpstream } from "./fetch-upstream.ts";
-import { wrapInJsModule } from "./stream/to-module.ts";
+import { JsModuleWrapperTransformStream } from "./stream/to-module.ts";
+import { ChunkSizeMultiplesOfNBytesTransformer } from "./stream/chunk-size-multiple-of-n-bytes.ts";
+import { BinaryDataToBase64Transformer } from "./stream/binary-data-to-base64-transformer.ts";
 
 function isEmptyResponseAndShouldForwardHeaders(response: Response): boolean {
   return [204, 205, 304].includes(response.status);
@@ -36,23 +33,10 @@ export async function requestHandler(request: Request): Promise<Response> {
     return new Response("No body in upstream response.", { status: 500 });
   }
 
-  const chunkSizeTransformer = getDesiredChunkSizeTransformer(3);
-
-  const reader = readerWithDesiredChunkSize(
-    upstreamResponse.body.getReader(),
-    chunkSizeTransformer,
-  );
-
-  // transform using the binaryDataToBase64Transformer
-  const base64EncodedDataReader = new TransformStream(
-    binaryDataToBase64Transformer,
-  );
-
-  // pipe the binary data to the base64 transformer
-  binaryDataReaderWithChunkSize.pipeTo(base64EncodedDataReader.writable);
-
-  // wrap with wrapInJsModule
-  const jsModuleReadable = wrapInJsModule(base64EncodedDataReader.readable);
+  const jsModuleReadable: ReadableStream<Uint8Array> = upstreamResponse.body
+    .pipeThrough(new ChunkSizeMultiplesOfNBytesTransformer(3))
+    .pipeThrough(new BinaryDataToBase64Transformer())
+    .pipeThrough(new JsModuleWrapperTransformStream());
 
   // return a new Response with the readable stream as the body
   return new Response(jsModuleReadable, {
@@ -60,7 +44,7 @@ export async function requestHandler(request: Request): Promise<Response> {
     headers: filterHeaders(
       upstreamResponse.headers,
       RESPONSE_HEADERS_TO_FORWARD,
-      [["content-type", "application/javascript"]],
+      { "content-type": "application/javascript; charset=utf-8" },
     ),
   });
 }

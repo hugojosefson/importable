@@ -8,7 +8,7 @@ function isAllowedProtocol(protocol: string): boolean {
   return protocol === "https:";
 }
 
-function validateRequestedUrl(url: URL): void {
+function validateRequestedUrlOrThrow(url: URL): void {
   if (!isAllowedProtocol(url.protocol)) {
     throw new Response("Not allowed", { status: 403 });
   }
@@ -18,7 +18,7 @@ function validateRequestedUrl(url: URL): void {
   }
 }
 
-export function getValidRequestedUrl(request: Request): URL {
+export function getValidRequestedUrlOrThrow(request: Request): URL {
   const url = new URL(request.url);
   const pathname = url.pathname.slice(1);
   const search = url.search;
@@ -26,6 +26,6 @@ export function getValidRequestedUrl(request: Request): URL {
   const requestedUrlString = [pathname, search].join("");
 
   const requestedUrl = new URL(requestedUrlString);
-  validateRequestedUrl(requestedUrl);
+  validateRequestedUrlOrThrow(requestedUrl);
   return requestedUrl;
 }
