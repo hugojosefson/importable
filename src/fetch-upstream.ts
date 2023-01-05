@@ -1,22 +1,25 @@
 import { getValidRequestedUrlOrThrow } from "./allowed-request-url-to-forward.ts";
-import { Entry, filterHeaders, indent } from "./fn.ts";
+import { Entry, filterHeaders, headersToEntries, indent } from "./fn.ts";
 import { REQUEST_HEADERS_TO_FORWARD } from "./allowed-request-headers-to-forward.ts";
 import { getValidRequestedMethodOrThrow } from "./allowed-request-methods-to-forward.ts";
 
 function createLogMessage(
+  requestedMethod: string,
   requestedUrl: URL,
   requestHeaders: Headers,
   upstreamResponse: Response,
-  request: Request,
 ) {
   return indent(
     2,
     [
-      `Requested URL: ${requestedUrl}`,
-      `Requested Headers: ${JSON.stringify(requestHeaders, null, 2)}`,
-      `Upstream response URL: ${upstreamResponse.url}`,
-      `Upstream response Status: ${upstreamResponse.status} ${upstreamResponse.statusText}`,
-      `Upstream response Headers: ${JSON.stringify(request.headers, null, 2)}`,
+      `Request method:            ${requestedMethod}`,
+      `Request URL:               ${requestedUrl}`,
+      `Request Headers:           ${
+        JSON.stringify(Array.from(requestHeaders.entries()))
+      }`,
+      `Upstream response URL:     ${upstreamResponse.url}`,
+      `Upstream response Status:  ${upstreamResponse.status} ${upstreamResponse.statusText}`,
+      `Upstream response Headers: `,
     ],
   );
 }
@@ -31,7 +34,6 @@ export async function fetchUpstream(request: Request): Promise<Response> {
     REQUEST_HEADERS_TO_FORWARD,
     [referrer],
   );
-
   const upstreamResponse = await fetch(
     requestedUrl,
     {
@@ -44,16 +46,36 @@ export async function fetchUpstream(request: Request): Promise<Response> {
   console.debug(
     [
       "Proxying request",
-      createLogMessage(requestedUrl, requestHeaders, upstreamResponse, request),
+      createLogMessage(
+        requestedMethod,
+        requestedUrl,
+        requestHeaders,
+        upstreamResponse,
+      ),
     ].join("\n"),
+  );
+  console.table(
+    Object.fromEntries(headersToEntries(upstreamResponse.headers)),
   );
 
   if (upstreamResponse.ok) {
+    console.debug("Upstream response is OK, returning it");
     return upstreamResponse;
   }
 
-  throw new Error([
+  if (upstreamResponse.status === 404) {
+    console.debug("Upstream response is 404, throwing 404 response");
+    throw new Response("Not Found", { status: 404 });
+  }
+
+  console.error([
     "Upstream response not ok.",
-    createLogMessage(requestedUrl, requestHeaders, upstreamResponse, request),
+    createLogMessage(
+      requestedMethod,
+      requestedUrl,
+      requestHeaders,
+      upstreamResponse,
+    ),
   ].join("\n"));
+  throw new Response("Bad Gateway", { status: 502 });
 }

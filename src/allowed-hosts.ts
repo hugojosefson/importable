@@ -6,6 +6,4 @@ export const ALLOWED_HOSTS: string[] = [
   "cdn.jsdelivr.net",
   "deno.land",
   "raw.githubusercontent.com",
-  "github.com",
-  "www.hugojosefson.com",
 ];

@@ -10,10 +10,14 @@ function isAllowedProtocol(protocol: string): boolean {
 
 function validateRequestedUrlOrThrow(url: URL): void {
   if (!isAllowedProtocol(url.protocol)) {
+    console.error(
+      `Requested protocol not allowed: ${url.protocol} (for ${url})`,
+    );
     throw new Response("Not allowed", { status: 403 });
   }
 
   if (!isAllowedHost(url.host)) {
+    console.error(`Requested host not allowed: ${url.host} (for ${url})`);
     throw new Response("Not allowed", { status: 403 });
   }
 }

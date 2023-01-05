@@ -3,6 +3,7 @@ function isResponse(err: unknown): err is Response {
 }
 
 export async function errorHandler(error: unknown): Promise<Response> {
+  console.debug(`Handling error:`, error);
   try {
     const possiblyResponse = await error;
     if (isResponse(possiblyResponse)) {
