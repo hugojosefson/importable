@@ -28,12 +28,22 @@ export function filterHeaders(
 ): Headers {
   const predicate = ([key]: Entry) => allowed.includes(key.toLowerCase());
   const headersToKeep = headersToEntries(headers).filter(predicate);
+  console.debug(`Keeping headers: ${JSON.stringify(headersToKeep, null, 2)}`);
+
   const headersToSend = new Headers(headersToKeep);
+  console.debug(
+    `Headers to send: ${JSON.stringify(headersToSend.entries(), null, 2)}`,
+  );
+
+  console.debug(
+    `Overriding headers: ${JSON.stringify(overridingHeaders, null, 2)}`,
+  );
   if (overridingHeaders) {
     headersToEntries(overridingHeaders).forEach(([key, value]) => {
       headersToSend.set(key, value);
     });
   }
+  console.debug(`Filtered headers: ${JSON.stringify(headersToSend, null, 2)}`);
   return headersToSend;
 }
 

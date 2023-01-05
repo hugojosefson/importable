@@ -1,4 +1,5 @@
 import { add } from "../fn.ts";
+import { toTransformStream } from "https://deno.land/std@0.171.0/streams/to_transform_stream.ts";
 
 const encoder = new TextEncoder();
 export const JS_MODULE_PROLOGUE = encoder.encode(`export default "`);
@@ -9,30 +10,17 @@ export const JS_MODULE_WRAPPER_SIZE = [
   JS_MODULE_EPILOGUE.length,
 ].reduce(add);
 
-export class JsModuleWrapperTransformStream
-  extends TransformStream<Uint8Array, Uint8Array> {
-  private prologueRead = false;
-  private epilogueRead = false;
-
-  constructor() {
-    super({
-      transform: (chunk, controller) => {
-        if (!this.prologueRead) {
-          this.prologueRead = true;
-          controller.enqueue(JS_MODULE_PROLOGUE);
-          return;
-        }
-        if (this.epilogueRead) {
-          return;
-        }
-        controller.enqueue(chunk);
-      },
-      flush: (controller) => {
-        if (!this.epilogueRead) {
-          this.epilogueRead = true;
-          controller.enqueue(JS_MODULE_EPILOGUE);
-        }
-      },
-    });
-  }
+export function jsModuleWrapperTransformStream(): TransformStream<
+  Uint8Array,
+  Uint8Array
+> {
+  return toTransformStream(async function* (
+    src: ReadableStream<Uint8Array>,
+  ): AsyncGenerator<Uint8Array> {
+    yield JS_MODULE_PROLOGUE;
+    for await (const chunk of src) {
+      yield chunk;
+    }
+    yield JS_MODULE_EPILOGUE;
+  });
 }

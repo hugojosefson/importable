@@ -1,9 +1,17 @@
-import { filterHeaders } from "./fn.ts";
+import { Entries, filterHeaders } from "./fn.ts";
 import { RESPONSE_HEADERS_TO_FORWARD } from "./allowed-response-headers-to-forward.ts";
 import { fetchUpstream } from "./fetch-upstream.ts";
-import { JsModuleWrapperTransformStream } from "./stream/to-module.ts";
-import { ChunkSizeMultiplesOfNBytesTransformer } from "./stream/chunk-size-multiple-of-n-bytes.ts";
-import { BinaryDataToBase64Transformer } from "./stream/binary-data-to-base64-transformer.ts";
+import {
+  JS_MODULE_WRAPPER_SIZE,
+  jsModuleWrapperTransformStream,
+} from "./stream/to-module.ts";
+import {
+  base64Transformer,
+  calculateBase64Length,
+} from "./stream/binary-data-to-base64-transformer.ts";
+import {
+  chunkSizeMultiplesOfNBytesTransformer,
+} from "./stream/chunk-size-multiple-of-n-bytes.ts";
 
 function isEmptyResponseAndShouldForwardHeaders(response: Response): boolean {
   return [204, 205, 304].includes(response.status);
@@ -33,10 +41,22 @@ export async function requestHandler(request: Request): Promise<Response> {
     return new Response("No body in upstream response.", { status: 500 });
   }
 
+  const upstreamContentLength: number = parseInt(
+    upstreamResponse.headers.get("content-length") ?? "NaN",
+    10,
+  );
+  const ourContentLength: number | undefined = isNaN(upstreamContentLength)
+    ? undefined
+    : (calculateBase64Length(upstreamContentLength) + JS_MODULE_WRAPPER_SIZE);
+
   const jsModuleReadable: ReadableStream<Uint8Array> = upstreamResponse.body
-    .pipeThrough(new ChunkSizeMultiplesOfNBytesTransformer(3))
-    .pipeThrough(new BinaryDataToBase64Transformer())
-    .pipeThrough(new JsModuleWrapperTransformStream());
+    .pipeThrough(chunkSizeMultiplesOfNBytesTransformer(3))
+    .pipeThrough(base64Transformer())
+    .pipeThrough(jsModuleWrapperTransformStream());
+
+  const possibleContentLength: Entries = ourContentLength
+    ? [["content-length", `${ourContentLength}`]]
+    : [];
 
   // return a new Response with the readable stream as the body
   return new Response(jsModuleReadable, {
@@ -44,7 +64,10 @@ export async function requestHandler(request: Request): Promise<Response> {
     headers: filterHeaders(
       upstreamResponse.headers,
       RESPONSE_HEADERS_TO_FORWARD,
-      { "content-type": "application/javascript; charset=utf-8" },
+      [
+        ["content-type", "application/javascript; charset=utf-8"],
+        ...possibleContentLength,
+      ],
     ),
   });
 }

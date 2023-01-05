@@ -1,16 +1,41 @@
-export class ChunkSizeMultiplesOfNBytesTransformer
-  extends TransformStream<Uint8Array, Uint8Array> {
-  constructor(private desiredChunkSize: number) {
-    super({
-      transform: (chunk, controller) => {
-        const remainder = chunk.length % this.desiredChunkSize;
-        if (remainder === 0) {
-          controller.enqueue(chunk);
-          return;
+import { toTransformStream } from "https://deno.land/std@0.171.0/streams/to_transform_stream.ts";
+
+/**
+ * A pass-through TransformStream that makes sure all output chunks are a multiple of n bytes. Except the last chunk.
+ * @param desiredChunkSizeMultiple
+ */
+export function chunkSizeMultiplesOfNBytesTransformer(
+  desiredChunkSizeMultiple: number,
+): TransformStream<Uint8Array, Uint8Array> {
+  return toTransformStream(
+    async function* (
+      src: ReadableStream<Uint8Array>,
+    ): AsyncGenerator<Uint8Array> {
+      let remainder: Uint8Array | undefined;
+      for await (let chunk of src) {
+        if (remainder) {
+          const combined = new Uint8Array(
+            remainder.length + chunk.length,
+          );
+          combined.set(remainder);
+          combined.set(chunk, remainder.length);
+          chunk = combined;
         }
-        const chunkSize = chunk.length - remainder;
-        controller.enqueue(chunk.slice(0, chunkSize));
-      },
-    });
-  }
+        const remainderLength = chunk.length % desiredChunkSizeMultiple;
+        if (remainderLength) {
+          remainder = chunk.slice(
+            chunk.length - remainderLength,
+            chunk.length,
+          );
+          chunk = chunk.slice(0, chunk.length - remainderLength);
+        } else {
+          remainder = undefined;
+        }
+        yield chunk;
+      }
+      if (remainder) {
+        yield remainder;
+      }
+    },
+  );
 }

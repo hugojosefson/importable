@@ -7,4 +7,5 @@ export const ALLOWED_HOSTS: string[] = [
   "deno.land",
   "raw.githubusercontent.com",
   "github.com",
+  "www.hugojosefson.com",
 ];
