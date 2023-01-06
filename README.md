@@ -18,8 +18,12 @@ file's URL, and the `.wasm` file's binary contents will be converted to a
 Instead of:
 
 ```ts
-const response = await fetch("https://unpkg.com/yoga-wasm-web/dist/yoga.wasm");
-const wasmBytes = await response.arrayBuffer();
+const response = await fetch("https://unpkg.com/yoga-wasm-web/dist/yoga.wasm", {
+  redirect: "follow",
+});
+export const wasmBytes: Uint8Array = new Uint8Array(
+  await response.arrayBuffer(),
+);
 ```
 
 ...which will not be cached along with other imports, and will be fetched at
@@ -31,7 +35,7 @@ You can now instead do:
 import base64String from "https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm";
 import { decode } from "https://deno.land/std/encoding/base64.ts";
 
-const wasmBytes = decode(base64String);
+export const wasmBytes: Uint8Array = decode(base64String);
 ```
 
 ...which will be part of the static import structure, and cached along with

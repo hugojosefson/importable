@@ -58,16 +58,27 @@ Deno.test("there are 2 typescript code snippets", () => {
   assertEquals(codeSnippets.length, 2);
 });
 
-Deno.test("README code snippets are valid TypeScript and run without error", async () => {
+Deno.test("README code snippets are valid TypeScript and run without error in an external deno process", async () => {
   for (const codeSnippet of codeSnippets) {
-    await runSnippet(codeSnippet);
+    await runSnippetInExternalProcess(codeSnippet);
   }
 });
 
-async function runSnippet(snippet: string) {
+async function runWithCodeSnippetInTempFile<T>(
+  codeSnippet: string,
+  callback: (tempFile: string) => T | Promise<T>,
+): Promise<T> {
   const tempFile = await Deno.makeTempFile({ suffix: ".ts" });
   try {
-    await Deno.writeTextFile(tempFile, snippet);
+    await Deno.writeTextFile(tempFile, codeSnippet);
+    return await callback(tempFile);
+  } finally {
+    await Deno.remove(tempFile);
+  }
+}
+
+async function runSnippetInExternalProcess(snippet: string) {
+  await runWithCodeSnippetInTempFile(snippet, async (tempFile) => {
     const process = Deno.run({
       cmd: [
         "deno",
@@ -83,11 +94,44 @@ async function runSnippet(snippet: string) {
     const stderr = await process.stderrOutput();
     if (code !== 0) {
       throw new Error(`deno run failed with code ${code}:
-stdout: ${new TextDecoder().decode(stdout)}
-stderr: ${new TextDecoder().decode(stderr)}`);
+        stdout: ${new TextDecoder().decode(stdout)}
+        stderr: ${new TextDecoder().decode(stderr)}`);
     }
     process.close();
-  } finally {
-    await Deno.remove(tempFile);
-  }
+  });
 }
+
+function assertNotUndefined(something: unknown): void {
+  if (something === undefined) {
+    throw new Error("Expected something to not be undefined");
+  }
+  console.debug("assertNotUndefined", something);
+}
+
+function assertNotEmptyModule(something: unknown): void {
+  assertNotUndefined(something);
+  const module = something as Record<string, unknown>;
+  if (Object.keys(module).length === 0) {
+    throw new Error("Expected module to have at least one key");
+  }
+  if (Object.values(module).every((value) => value === undefined)) {
+    throw new Error("Expected at least one module value to not be undefined");
+  }
+  console.debug("assertNotEmptyModule", something);
+}
+
+Deno.test("README code snippets are valid TypeScript and export the same things (not undefined!), using async import() to check the snippets", async () => {
+  const results = await Promise.all(
+    codeSnippets.map(async (codeSnippet) => {
+      return await runWithCodeSnippetInTempFile(
+        codeSnippet,
+        (tempFile) => import(`file://${tempFile}`),
+      );
+    }),
+  );
+  const firstResult = results[0];
+  assertNotEmptyModule(firstResult);
+  for (const result of results) {
+    assertEquals(result, firstResult);
+  }
+});

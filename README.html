@@ -18,8 +18,12 @@ file's URL, and the <code>.wasm</code> file's binary contents will be converted 
 <code>default</code> export of a base64 string. Then you can import that.</p>
 <h3>Example</h3>
 <p>Instead of:</p>
-<pre class="highlight"><code class="language-ts">const response = await fetch(&quot;https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;);
-const wasmBytes = await response.arrayBuffer();
+<pre class="highlight"><code class="language-ts">const response = await fetch(&quot;https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;, {
+  redirect: &quot;follow&quot;,
+});
+export const wasmBytes: Uint8Array = new Uint8Array(
+  await response.arrayBuffer(),
+);
 </code></pre>
 
 <p>...which will not be cached along with other imports, and will be fetched at
@@ -28,7 +32,7 @@ runtime,</p>
 <pre class="highlight"><code class="language-ts">import base64String from &quot;https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;;
 import { decode } from &quot;https://deno.land/std/encoding/base64.ts&quot;;
 
-const wasmBytes = decode(base64String);
+export const wasmBytes: Uint8Array = decode(base64String);
 </code></pre>
 
 <p>...which will be part of the static import structure, and cached along with
