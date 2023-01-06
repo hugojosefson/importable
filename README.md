@@ -47,6 +47,8 @@ other imports.
 The URL must be a valid `https` URL, and from one of the hosts listed in
 [src/allowed-hosts.ts](src/allowed-hosts.ts).
 
-## License
+## Source code, License
 
-MIT
+| Source code | [github.com/hugojosefson/importable](https://github.com/hugojosefson/importable) |
+| ----------- | -------------------------------------------------------------------------------- |
+| License     | MIT                                                                              |
