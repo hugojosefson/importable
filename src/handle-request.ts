@@ -10,8 +10,8 @@ import {
   calculateBase64Length,
 } from "./stream/binary-data-to-base64-transformer.ts";
 import { chunkSizeMultiplesOfNBytesTransformer } from "./stream/chunk-size-multiple-of-n-bytes.ts";
-import { errorHandler } from "./error-handler.ts";
-import { README_HTML } from "./root-page.ts";
+import { handleError } from "./handle-error.ts";
+import { handleRootRequest } from "./handle-root-request.ts";
 
 function isLegitimatelyEmptyResponse(
   request: Request,
@@ -72,27 +72,11 @@ function createOurResponseHeaders(upstreamResponse: Response) {
  * @param {Request} request
  * @returns {Response}
  */
-export async function requestHandler(request: Request): Promise<Response> {
+export async function handleRequest(request: Request): Promise<Response> {
   try {
-    const method = request.method.toUpperCase();
     const url = new URL(request.url);
     if (url.pathname === "/") {
-      if (!["HEAD", "GET"].includes(method)) {
-        return new Response("Method not allowed", { status: 405 });
-      }
-      const body: string | undefined = method === "GET"
-        ? README_HTML
-        : undefined;
-      return new Response(
-        body,
-        {
-          status: 200,
-          headers: {
-            "content-type": "text/html; charset=utf-8",
-            "content-length": `${README_HTML.length}`,
-          },
-        },
-      );
+      return handleRootRequest(request);
     }
     const upstreamResponse: Response = await fetchUpstream(request);
 
@@ -115,6 +99,6 @@ export async function requestHandler(request: Request): Promise<Response> {
       },
     );
   } catch (error) {
-    return errorHandler(error);
+    return handleError(error);
   }
 }

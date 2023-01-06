@@ -45,7 +45,7 @@ other imports.
 ### Allowed URLs
 
 The URL must be a valid `https` URL, and from one of the hosts listed in
-[src/allowed-hosts.ts](src/allowed-hosts.ts).
+[src/allowed-hosts.ts](https://github.com/hugojosefson/importable/blob/main/src/allowed-hosts.ts).
 
 ## Source code, License
 

@@ -2,7 +2,7 @@ function isResponse(err: unknown): err is Response {
   return err instanceof Response;
 }
 
-export async function errorHandler(error: unknown): Promise<Response> {
+export async function handleError(error: unknown): Promise<Response> {
   console.debug(`Handling error:`, error);
   try {
     const possiblyResponse = await error;

@@ -2,7 +2,7 @@ import {
   Token,
   tokens,
 } from "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.170.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.171.0/testing/asserts.ts";
 import { ALLOWED_HOSTS } from "../src/allowed-hosts.ts";
 
 const README_MD = await Deno.readTextFile(
