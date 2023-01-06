@@ -2,7 +2,7 @@ import { getValidRequestedUrlOrThrow } from "./allowed-request-url-to-forward.ts
 import { Entry, filterHeaders, headersToEntries, indent } from "./fn.ts";
 import { REQUEST_HEADERS_TO_FORWARD } from "./allowed-request-headers-to-forward.ts";
 import { getValidRequestedMethodOrThrow } from "./allowed-request-methods-to-forward.ts";
-import {REDIRECT_STATUS_CODES} from "./http-status.ts";
+import { REDIRECT_STATUS_CODES } from "./http-status.ts";
 
 function createLogMessage(
   requestedMethod: string,

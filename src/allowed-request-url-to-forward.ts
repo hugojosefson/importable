@@ -23,15 +23,20 @@ function validateRequestedUrlOrThrow(url: URL): void {
 }
 
 export function getValidRequestedUrlOrThrow(request: Request): URL {
-  const url = new URL(request.url);
-  const pathname = url.pathname.slice(1);
-  const search = url.search;
+  try {
+    const url = new URL(request.url);
+    const pathname = url.pathname.slice(1);
+    const search = url.search;
 
-  const requestedUrlString = [pathname, search].join("");
+    const requestedUrlString = [pathname, search].join("");
 
-  const requestedUrl = new URL(requestedUrlString);
-  validateRequestedUrlOrThrow(requestedUrl);
-  return requestedUrl;
+    const requestedUrl = new URL(requestedUrlString);
+    validateRequestedUrlOrThrow(requestedUrl);
+    return requestedUrl;
+  } catch (error) {
+    console.error("Error parsing requested URL", error);
+    throw new Response("Not found", { status: 404 });
+  }
 }
 
 export function getOurBaseUrl(request: Request): URL {
