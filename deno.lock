@@ -1,7 +1,7 @@
 {
   "version": "2",
   "remote": {
-    "http://localhost:8080/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm": "eb02566b137f0fbe69e255827ec16f6aa047ef50ccb21c74e2244e4505efae60",
+    "http://localhost:8080/https://unpkg.com/yoga-wasm-web@0.2.0/dist/yoga.wasm": "eb02566b137f0fbe69e255827ec16f6aa047ef50ccb21c74e2244e4505efae60",
     "https://deno.land/std@0.103.0/encoding/base64.ts": "eecae390f1f1d1cae6f6c6d732ede5276bf4b9cd29b1d281678c054dc5cc009e",
     "https://deno.land/std@0.171.0/async/abortable.ts": "73acfb3ed7261ce0d930dbe89e43db8d34e017b063cf0eaa7d215477bf53442e",
     "https://deno.land/std@0.171.0/async/deadline.ts": "b98e50d2c42399af03ad13bbb8cf59dadb9f0cd5d70648cc0c3b9202d75ab565",

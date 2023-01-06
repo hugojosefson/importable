@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "make && $(head -n1 main.ts | sed -E 's|#!/usr/bin/env -S ||') --watch main.ts --watch README.html",
+    "dev": "make dev && $(head -n1 main.ts | sed -E 's|#!/usr/bin/env -S ||') --watch main.ts --watch README.html",
     "deploy": "make && deployctl deploy --project=importable ./main.ts"
   }
 }

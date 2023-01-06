@@ -11,10 +11,11 @@ MAIN_TS := ./main.ts
 MAIN_SOURCE_TS := ./main-source.ts
 ALLOWED_HOSTS_TS := ./src/allowed-hosts.ts
 
-.PHONY: default all clean fmt lint check test
+.PHONY: default all clean fmt lint check test dev
 
 default: all
 all: $(MAIN_TS) fmt README.html check lint test
+dev: $(MAIN_TS) fmt README.html check lint
 
 $(MAIN_TS): Makefile $(ALLOWED_HOSTS_TS) $(MAIN_SOURCE_TS)
 	ALLOWED_HOSTS="$$(deno eval 'console.log((await import("$(ALLOWED_HOSTS_TS)")).ALLOWED_HOSTS.join(","))')"; \

@@ -12,6 +12,11 @@ import {
 import { chunkSizeMultiplesOfNBytesTransformer } from "./stream/chunk-size-multiple-of-n-bytes.ts";
 import { handleError } from "./handle-error.ts";
 import { handleRootRequest } from "./handle-root-request.ts";
+import { EMPTY_STATUS_CODES, REDIRECT_STATUS_CODES } from "./http-status.ts";
+import {
+  getOurBaseUrl,
+  getValidRequestedUrlOrThrow,
+} from "./allowed-request-url-to-forward.ts";
 
 function isLegitimatelyEmptyResponse(
   request: Request,
@@ -20,7 +25,15 @@ function isLegitimatelyEmptyResponse(
   if (request.method.toUpperCase() === "HEAD" && response.ok) {
     return true;
   }
-  return [204, 205, 304].includes(response.status);
+  if (EMPTY_STATUS_CODES.includes(response.status)) {
+    return true;
+  }
+  return false;
+}
+function isRedirectResponse(
+  response: Response,
+): boolean {
+  return REDIRECT_STATUS_CODES.includes(response.status);
 }
 
 function calculateOurContentLength(upstreamResponse: Response) {
@@ -39,6 +52,10 @@ function createOurResponseBody(request: Request, upstreamResponse: Response) {
     return undefined;
   }
 
+  if (isRedirectResponse(upstreamResponse)) {
+    return undefined;
+  }
+
   if (!upstreamResponse.body) {
     return undefined;
   }
@@ -49,10 +66,32 @@ function createOurResponseBody(request: Request, upstreamResponse: Response) {
     .pipeThrough(jsModuleWrapperTransformStream());
 }
 
-function createOurResponseHeaders(upstreamResponse: Response) {
+function calculateRedirectLocation(
+  request: Request,
+  upstreamResponse: Response,
+) {
+  const requestedUrl = getValidRequestedUrlOrThrow(request);
+  const upstreamResponseLocation = upstreamResponse.headers.get("location") ??
+    "";
+  const absoluteLocation = new URL(upstreamResponseLocation, requestedUrl);
+  console.debug({
+    requestedUrl,
+    upstreamResponseLocation,
+    absoluteLocation,
+  });
+  return getOurBaseUrl(request).href + absoluteLocation.href;
+}
+
+function createOurResponseHeaders(
+  request: Request,
+  upstreamResponse: Response,
+) {
   const ourContentLength = calculateOurContentLength(upstreamResponse);
   const anyContentLengthHeaders: Entries = ourContentLength
     ? [["content-length", `${ourContentLength}`]]
+    : [];
+  const anyLocationHeaders: Entries = isRedirectResponse(upstreamResponse)
+    ? [["location", calculateRedirectLocation(request, upstreamResponse) ?? ""]]
     : [];
 
   const ourResponseHeaders = filterHeaders(
@@ -61,6 +100,7 @@ function createOurResponseHeaders(upstreamResponse: Response) {
     [
       ["content-type", "application/javascript; charset=utf-8"],
       ...anyContentLengthHeaders,
+      ...anyLocationHeaders,
     ],
   );
   return ourResponseHeaders;
@@ -88,6 +128,7 @@ export async function handleRequest(request: Request): Promise<Response> {
         upstreamResponse,
       );
     const ourResponseHeaders: Headers = createOurResponseHeaders(
+      request,
       upstreamResponse,
     );
 

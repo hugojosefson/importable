@@ -2,6 +2,7 @@ import { getValidRequestedUrlOrThrow } from "./allowed-request-url-to-forward.ts
 import { Entry, filterHeaders, headersToEntries, indent } from "./fn.ts";
 import { REQUEST_HEADERS_TO_FORWARD } from "./allowed-request-headers-to-forward.ts";
 import { getValidRequestedMethodOrThrow } from "./allowed-request-methods-to-forward.ts";
+import {REDIRECT_STATUS_CODES} from "./http-status.ts";
 
 function createLogMessage(
   requestedMethod: string,
@@ -38,7 +39,7 @@ export async function fetchUpstream(request: Request): Promise<Response> {
     requestedUrl,
     {
       headers: requestHeaders,
-      redirect: "follow",
+      redirect: "manual",
       method: requestedMethod,
     },
   );
@@ -60,6 +61,11 @@ export async function fetchUpstream(request: Request): Promise<Response> {
 
   if (upstreamResponse.ok) {
     console.debug("Upstream response is OK, returning it");
+    return upstreamResponse;
+  }
+
+  if (REDIRECT_STATUS_CODES.includes(upstreamResponse.status)) {
+    console.debug("Upstream response is a redirect, returning it");
     return upstreamResponse;
   }
 

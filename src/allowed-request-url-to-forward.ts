@@ -33,3 +33,7 @@ export function getValidRequestedUrlOrThrow(request: Request): URL {
   validateRequestedUrlOrThrow(requestedUrl);
   return requestedUrl;
 }
+
+export function getOurBaseUrl(request: Request): URL {
+  return new URL(new URL(request.url).origin);
+}
