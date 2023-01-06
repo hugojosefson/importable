@@ -1,6 +1,6 @@
 {
   "tasks": {
     "dev": "make && $(head -n1 main.ts | sed -E 's|#!/usr/bin/env -S ||') --watch main.ts",
-    "deploy": "make && deployctl deploy --no-static --project=importable ./main.ts"
+    "deploy": "make && deployctl deploy --project=importable ./main.ts"
   }
 }
