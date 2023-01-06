@@ -8,28 +8,28 @@
 <article class="markdown-body">
 <h1>importable</h1>
 <p>Makes fetchable urls, importable.</p>
-<h2>Usage</h2>
+<h2>Background</h2>
 <p>If you want to use a <code>.wasm</code> file, you can normally not <code>import</code> it directly,
 but have to use <code>fetch()</code> at runtime. This causes it to not be part of the
 static import structure, and not cached along with other <code>import</code>:ed modules.</p>
-<p>Instead, you can prepend
-<a href="https://importable.deno.dev/"><a href="https://importable.deno.dev/">https://importable.deno.dev/</a></a> to the <code>.wasm</code>
-file's URL, and the <code>.wasm</code> file's binary contents will be converted to a
-<code>default</code> export of a base64 string. Then you can import that.</p>
+<h2>Usage</h2>
+<p>Prepend <a href="https://importable.deno.dev/"><a href="https://importable.deno.dev/">https://importable.deno.dev/</a></a> to a file's
+URL, and the file's (possibly binary) contents will be converted to a <code>default</code>
+export of a base64 string. Then you can import that.</p>
 <h3>Example</h3>
 <p>Instead of:</p>
-<pre class="highlight"><code class="language-ts">const response = await fetch(&quot;https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;, {
+<pre class="highlight"><code class="language-ts">// don't do this
+const response = await fetch(&quot;https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;, {
   redirect: &quot;follow&quot;,
 });
-export const wasmBytes: Uint8Array = new Uint8Array(
-  await response.arrayBuffer(),
-);
+export const wasmBytes = new Uint8Array(await response.arrayBuffer());
 </code></pre>
 
-<p>...which will not be cached along with other imports, and will be fetched at
-runtime,</p>
+<p>...which will not be cached along with other imports, and will be fetched every
+time at runtime,</p>
 <p>You can now instead do:</p>
-<pre class="highlight"><code class="language-ts">import base64String from &quot;https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;;
+<pre class="highlight"><code class="language-ts">// do this
+import base64String from &quot;https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;;
 import { decode } from &quot;https://deno.land/std/encoding/base64.ts&quot;;
 
 export const wasmBytes: Uint8Array = decode(base64String);
@@ -38,16 +38,8 @@ export const wasmBytes: Uint8Array = decode(base64String);
 <p>...which will be part of the static import structure, and cached along with
 other imports.</p>
 <h3>Allowed URLs</h3>
-<p>The URL must be a valid <code>https</code> URL, and from one of the following domains:</p>
-<ul>
-<li><a href="https://unpkg.com"><code>https://unpkg.com</code></a></li>
-<li><a href="https://esm.sh"><code>https://esm.sh</code></a></li>
-<li><a href="https://cdn.jsdelivr.net"><code>https://cdn.jsdelivr.net</code></a></li>
-<li><a href="https://cdn.skypack.dev"><code>https://cdn.skypack.dev</code></a></li>
-<li><a href="https://jspm.dev"><code>https://jspm.dev</code></a></li>
-<li><a href="https://deno.land"><code>https://deno.land</code></a></li>
-<li><a href="https://raw.githubusercontent.com"><code>https://raw.githubusercontent.com</code></a></li>
-</ul>
+<p>The URL must be a valid <code>https</code> URL, and from one of the hosts listed in
+<a href="src/allowed-hosts.ts">src/allowed-hosts.ts</a>.</p>
 <h2>License</h2>
 <p>MIT</p></article>
 <style>
