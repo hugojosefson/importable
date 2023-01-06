@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --allow-net --allow-env=PORT --watch main.ts",
-    "deploy": "deployctl deploy --no-static --project=importable ./main.ts"
+    "dev": "make && $(head -n1 main.ts | sed -E 's|#!/usr/bin/env -S ||') --watch main.ts",
+    "deploy": "make && deployctl deploy --no-static --project=importable ./main.ts"
   }
 }

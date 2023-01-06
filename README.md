@@ -8,19 +8,18 @@ If you want to use a `.wasm` file, you can normally not `import` it directly,
 but have to use `fetch()` at runtime. This causes it to not be part of the
 static import structure, and not cached along with other `import`:ed modules.
 
-Instead, you can prepend `https://importable.deno.land/` to the `.wasm` file's
-URL, and the `.wasm` file's binary contents will be converted to a `default`
-export of a base64 string. Then you can import that.
+Instead, you can prepend
+[https://importable.deno.dev/](https://importable.deno.dev/) to the `.wasm`
+file's URL, and the `.wasm` file's binary contents will be converted to a
+`default` export of a base64 string. Then you can import that.
 
 ### Example
 
 Instead of:
 
 ```ts
-const wasmBytes = await fetch(
-  "https://unpkg.com/yoga-wasm-web/dist/yoga.wasm",
-)
-  .then((r) => r.arrayBuffer());
+const response = await fetch("https://unpkg.com/yoga-wasm-web/dist/yoga.wasm");
+const wasmBytes = await response.arrayBuffer();
 ```
 
 ...which will not be cached along with other imports, and will be fetched at
@@ -29,8 +28,9 @@ runtime,
 You can now instead do:
 
 ```ts
-import base64String from "https://importable.deno.land/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm";
+import base64String from "https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm";
 import { decode } from "https://deno.land/std/encoding/base64.ts";
+
 const wasmBytes = decode(base64String);
 ```
 

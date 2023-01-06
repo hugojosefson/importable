@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-net=unpkg.com,esm.sh,cdn.jsdelivr.net,cdn.skypack.dev,jspm.dev,deno.land,raw.githubusercontent.com --allow-env=PORT
+#!/usr/bin/env -S deno run --allow-net=unpkg.com,esm.sh,cdn.jsdelivr.net,cdn.skypack.dev,jspm.dev,deno.land,raw.githubusercontent.com,0.0.0.0 --allow-env=PORT --allow-read=README.html
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { errorHandler } from "./src/error-handler.ts";
 import { requestHandler } from "./src/request-handler.ts";
