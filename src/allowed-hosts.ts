@@ -6,4 +6,5 @@ export const ALLOWED_HOSTS: string[] = [
   "jspm.dev",
   "deno.land",
   "raw.githubusercontent.com",
+  "github.com",
 ];
