@@ -1,8 +1,9 @@
+import { run } from "https://deno.land/x/run_simple@2.0.0/mod.ts";
 import {
   Token,
   tokens,
 } from "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.171.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
 import { ALLOWED_HOSTS } from "../src/allowed-hosts.ts";
 
 const README_MD = await Deno.readTextFile(
@@ -18,11 +19,11 @@ type CodeBlock = {
 };
 
 function isTypeScript(token: Token) {
-  if (!isCodeBlock(token)) {
-    return false;
+  if (isCodeBlock(token)) {
+    const codeBlock = token;
+    return ["typescript", "ts"].includes(codeBlock.language);
   }
-  const codeBlock = token;
-  return ["typescript", "ts"].includes(codeBlock.language);
+  return false;
 }
 
 function isCodeBlock(token: Token): token is CodeBlock {
@@ -79,25 +80,12 @@ async function runWithCodeSnippetInTempFile<T>(
 
 async function runSnippetInExternalProcess(snippet: string) {
   await runWithCodeSnippetInTempFile(snippet, async (tempFile) => {
-    const process = Deno.run({
-      cmd: [
-        "deno",
-        "run",
-        `--allow-net=${ALLOWED_HOSTS.join(",")}`,
-        tempFile,
-      ],
-      stdout: "piped",
-      stderr: "piped",
-    });
-    const { code } = await process.status();
-    const stdout = await process.output();
-    const stderr = await process.stderrOutput();
-    if (code !== 0) {
-      throw new Error(`deno run failed with code ${code}:
-        stdout: ${new TextDecoder().decode(stdout)}
-        stderr: ${new TextDecoder().decode(stderr)}`);
-    }
-    process.close();
+    return await run([
+      "deno",
+      "run",
+      `--allow-net=${ALLOWED_HOSTS.join(",")}`,
+      tempFile,
+    ]);
   });
 }
 

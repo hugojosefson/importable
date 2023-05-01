@@ -1,3 +1,8 @@
+/**
+ * Which hosts are allowed to be proxied.
+ *
+ * File a Pull Request to add more hosts.
+ */
 export const ALLOWED_HOSTS: string[] = [
   "unpkg.com",
   "esm.sh",

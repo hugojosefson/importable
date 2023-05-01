@@ -20,9 +20,12 @@ Instead of:
 
 ```ts
 // don't do this
-const response = await fetch("https://unpkg.com/yoga-wasm-web/dist/yoga.wasm", {
-  redirect: "follow",
-});
+const response = await fetch(
+  "https://unpkg.com/yoga-wasm-web@0.3.3/dist/yoga.wasm",
+  {
+    redirect: "follow",
+  },
+);
 export const wasmBytes = new Uint8Array(await response.arrayBuffer());
 ```
 
@@ -33,8 +36,8 @@ You can now instead do:
 
 ```ts
 // do this
-import base64String from "https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm";
-import { decode } from "https://deno.land/std/encoding/base64.ts";
+import base64String from "https://importable.deno.dev/https://unpkg.com/yoga-wasm-web@0.3.3/dist/yoga.wasm";
+import { decode } from "https://deno.land/std@0.185.0/encoding/base64.ts";
 
 export const wasmBytes: Uint8Array = decode(base64String);
 ```

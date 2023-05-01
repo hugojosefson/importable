@@ -19,9 +19,12 @@ export of a base64 string. Then you can import that.</p>
 <h3>Example</h3>
 <p>Instead of:</p>
 <pre class="highlight"><code class="language-ts">// don't do this
-const response = await fetch(&quot;https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;, {
-  redirect: &quot;follow&quot;,
-});
+const response = await fetch(
+  &quot;https://unpkg.com/yoga-wasm-web@0.3.3/dist/yoga.wasm&quot;,
+  {
+    redirect: &quot;follow&quot;,
+  },
+);
 export const wasmBytes = new Uint8Array(await response.arrayBuffer());
 </code></pre>
 
@@ -29,8 +32,8 @@ export const wasmBytes = new Uint8Array(await response.arrayBuffer());
 time at runtime,</p>
 <p>You can now instead do:</p>
 <pre class="highlight"><code class="language-ts">// do this
-import base64String from &quot;https://importable.deno.dev/https://unpkg.com/yoga-wasm-web/dist/yoga.wasm&quot;;
-import { decode } from &quot;https://deno.land/std/encoding/base64.ts&quot;;
+import base64String from &quot;https://importable.deno.dev/https://unpkg.com/yoga-wasm-web@0.3.3/dist/yoga.wasm&quot;;
+import { decode } from &quot;https://deno.land/std@0.185.0/encoding/base64.ts&quot;;
 
 export const wasmBytes: Uint8Array = decode(base64String);
 </code></pre>

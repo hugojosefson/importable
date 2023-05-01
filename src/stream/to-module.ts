@@ -1,4 +1,4 @@
-import { toTransformStream } from "https://deno.land/std@0.171.0/streams/to_transform_stream.ts";
+import { toTransformStream } from "https://deno.land/std@0.185.0/streams/to_transform_stream.ts";
 
 export const JS_MODULE_PROLOGUE = new TextEncoder().encode(`export default "`);
 export const JS_MODULE_EPILOGUE = new TextEncoder().encode(`";`);
