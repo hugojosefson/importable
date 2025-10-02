@@ -1,4 +1,4 @@
-import { toTransformStream } from "https://deno.land/std@0.185.0/streams/to_transform_stream.ts";
+import { toTransformStream } from "@std/streams/to-transform-stream";
 
 /**
  * A pass-through TransformStream that makes sure all output chunks are a multiple of n bytes. Except the last chunk.

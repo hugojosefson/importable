@@ -1,6 +1,13 @@
 {
   "tasks": {
-    "dev": "make dev && $(head -n1 main.ts | sed -E 's|#!/usr/bin/env -S ||') --watch main.ts --watch README.html",
+    "dev": "make dev && $(head -n 1 main.ts | sed -E 's|#!/usr/bin/env -S ||') --watch main.ts --watch README.html",
     "deploy": "make && deployctl deploy --project=importable ./main.ts"
+  },
+  "imports": {
+    "@hugojosefson/run-simple": "jsr:@hugojosefson/run-simple@^2.4.0",
+    "@std/assert": "jsr:@std/assert@^1.0.14",
+    "@std/encoding": "jsr:@std/encoding@^1.0.10",
+    "@std/streams": "jsr:@std/streams@^1.0.12",
+    "x/rusty-markdown": "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts"
   }
 }

@@ -1,9 +1,6 @@
-import { run } from "https://deno.land/x/run_simple@2.0.0/mod.ts";
-import {
-  Token,
-  tokens,
-} from "https://deno.land/x/rusty_markdown@v0.4.1/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { run } from "@hugojosefson/run-simple";
+import { Token, tokens } from "x/rusty-markdown";
+import { assertEquals } from "@std/assert";
 import { ALLOWED_HOSTS } from "../src/allowed-hosts.ts";
 
 const README_MD = await Deno.readTextFile(
@@ -84,6 +81,7 @@ async function runSnippetInExternalProcess(snippet: string) {
       "deno",
       "run",
       `--allow-net=${ALLOWED_HOSTS.join(",")}`,
+      "--allow-import",
       tempFile,
     ]);
   });

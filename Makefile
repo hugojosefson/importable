@@ -20,7 +20,7 @@ dev: $(MAIN_TS) fmt README.html check lint
 $(MAIN_TS): Makefile $(ALLOWED_HOSTS_TS) $(MAIN_SOURCE_TS)
 	ALLOWED_HOSTS="$$(deno eval 'console.log((await import("$(ALLOWED_HOSTS_TS)")).ALLOWED_HOSTS.join(","))')"; \
 	ALLOWED_ENVS="$$(grep -oP 'Deno.env.get\("\K[^"]+' $(MAIN_SOURCE_TS) | tr '\n' ',' | sed 's/,$$//')"; \
-	echo "#!/usr/bin/env -S deno run --allow-net=$${ALLOWED_HOSTS},0.0.0.0 --allow-env=$${ALLOWED_ENVS} --allow-read=README.html" > $(MAIN_TS)
+	echo "#!/usr/bin/env -S deno run --allow-net=$${ALLOWED_HOSTS},0.0.0.0 --allow-env=$${ALLOWED_ENVS} --allow-read=README.html --allow-import" > $(MAIN_TS)
 	cat $(MAIN_SOURCE_TS) >> $(MAIN_TS)
 	chmod +x $(MAIN_TS)
 
@@ -39,4 +39,4 @@ lint: $(ALL_LINTABLE_FILES)
 test: $(ALL_LINTABLE_FILES) $(MAIN_TS) $(ALLOWED_HOSTS_TS)
 	ALLOWED_HOSTS="$$(deno eval 'console.log((await import("$(ALLOWED_HOSTS_TS)")).ALLOWED_HOSTS.join(","))'),localhost:8080"; \
 	TMP_DIR="$$(tmp_file=$$(mktemp); tmp_dir=$$(dirname $${tmp_file}); rm -f -- "$$tmp_file"; echo "$$tmp_dir")"; \
-	deno test --allow-read=README.md,README.html,$${TMP_DIR} --allow-write=$${TMP_DIR} --allow-run=deno --allow-net=$${ALLOWED_HOSTS} --allow-env=VERBOSE
+	deno test --allow-read=README.md,README.html,$${TMP_DIR} --allow-write=$${TMP_DIR} --allow-run=deno --allow-net=$${ALLOWED_HOSTS} --allow-env=VERBOSE --allow-import

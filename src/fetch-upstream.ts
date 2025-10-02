@@ -1,7 +1,7 @@
-import { getValidRequestedUrlOrThrow } from "./allowed-request-url-to-forward.ts";
-import { Entry, filterHeaders, headersToEntries, indent } from "./fn.ts";
 import { REQUEST_HEADERS_TO_FORWARD } from "./allowed-request-headers-to-forward.ts";
 import { getValidRequestedMethodOrThrow } from "./allowed-request-methods-to-forward.ts";
+import { getValidRequestedUrlOrThrow } from "./allowed-request-url-to-forward.ts";
+import { Entry, filterHeaders, headersToEntries, indent } from "./fn.ts";
 import { REDIRECT_STATUS_CODES } from "./http-status.ts";
 
 function createLogMessage(
@@ -65,8 +65,24 @@ export async function fetchUpstream(request: Request): Promise<Response> {
   }
 
   if (REDIRECT_STATUS_CODES.includes(upstreamResponse.status)) {
-    console.debug("Upstream response is a redirect, returning it");
-    return upstreamResponse;
+    console.debug(
+      "Upstream response is a redirect, prefixing their response header location with our origin",
+    );
+    const location = upstreamResponse.headers.get("location");
+    if (!location) {
+      console.error("Upstream response is a redirect but has no location");
+      throw new Response("Bad Gateway", { status: 502 });
+    }
+    const absoluteLocation = new URL(location, requestedUrl);
+    const ourPrefix = new URL(request.url).origin;
+    const newLocation = `${ourPrefix}/${absoluteLocation.href}`;
+    const headers = new Headers(upstreamResponse.headers);
+    headers.set("location", newLocation);
+    return new Response(upstreamResponse.body, {
+      status: upstreamResponse.status,
+      statusText: upstreamResponse.statusText,
+      headers,
+    });
   }
 
   if (upstreamResponse.status === 404) {

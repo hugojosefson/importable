@@ -1,8 +1,8 @@
-import { toTransformStream } from "https://deno.land/std@0.185.0/streams/to_transform_stream.ts";
-import { encode as base64encode } from "https://deno.land/std@0.185.0/encoding/base64.ts";
+import { toTransformStream } from "@std/streams/to-transform-stream";
+import { encodeBase64 } from "@std/encoding/base64";
 
 export function base64Chunk(chunk: Uint8Array): Uint8Array {
-  const base64 = base64encode(chunk);
+  const base64 = encodeBase64(Uint8Array.from(chunk));
   const bytes = new TextEncoder().encode(base64);
   return bytes;
 }
