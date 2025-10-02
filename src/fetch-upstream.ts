@@ -66,23 +66,9 @@ export async function fetchUpstream(request: Request): Promise<Response> {
 
   if (REDIRECT_STATUS_CODES.includes(upstreamResponse.status)) {
     console.debug(
-      "Upstream response is a redirect, prefixing their response header location with our origin",
+      "Upstream response is a redirect, using it after rewrite",
     );
-    const location = upstreamResponse.headers.get("location");
-    if (!location) {
-      console.error("Upstream response is a redirect but has no location");
-      throw new Response("Bad Gateway", { status: 502 });
-    }
-    const absoluteLocation = new URL(location, requestedUrl);
-    const ourPrefix = new URL(request.url).origin;
-    const newLocation = `${ourPrefix}/${absoluteLocation.href}`;
-    const headers = new Headers(upstreamResponse.headers);
-    headers.set("location", newLocation);
-    return new Response(upstreamResponse.body, {
-      status: upstreamResponse.status,
-      statusText: upstreamResponse.statusText,
-      headers,
-    });
+    return upstreamResponse;
   }
 
   if (upstreamResponse.status === 404) {
