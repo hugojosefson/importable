@@ -36,7 +36,13 @@ function isRedirectResponse(
   return REDIRECT_STATUS_CODES.includes(response.status);
 }
 
-function calculateOurContentLength(upstreamResponse: Response) {
+function calculateOurContentLength(
+  ourResponseBody: ReadableStream<Uint8Array> | undefined,
+  upstreamResponse: Response,
+) {
+  if (!ourResponseBody) {
+    return 0; // because createOurResponseBody returns undefined in that case
+  }
   const upstreamContentLength: number = parseInt(
     upstreamResponse.headers.get("content-length") ?? "NaN",
     10,
@@ -85,8 +91,12 @@ function calculateRedirectLocation(
 function createOurResponseHeaders(
   request: Request,
   upstreamResponse: Response,
+  ourResponseBody: ReadableStream<Uint8Array> | undefined,
 ) {
-  const ourContentLength = calculateOurContentLength(upstreamResponse);
+  const ourContentLength = calculateOurContentLength(
+    ourResponseBody,
+    upstreamResponse,
+  );
   const anyContentLengthHeaders: Entries = ourContentLength
     ? [["content-length", `${ourContentLength}`]]
     : [];
@@ -130,6 +140,7 @@ export async function handleRequest(request: Request): Promise<Response> {
     const ourResponseHeaders: Headers = createOurResponseHeaders(
       request,
       upstreamResponse,
+      ourResponseBody,
     );
 
     return new Response(

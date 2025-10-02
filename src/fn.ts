@@ -23,7 +23,7 @@ export function headersToEntries(headers?: Headersish): Entries {
  */
 export function filterHeaders(
   headers: Headersish,
-  allowed: string[],
+  allowed: readonly string[],
   overridingHeaders?: Headersish,
 ): Headers {
   const predicate = ([key]: Entry) => allowed.includes(key.toLowerCase());
