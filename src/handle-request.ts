@@ -97,7 +97,7 @@ function createOurResponseHeaders(
     ourResponseBody,
     upstreamResponse,
   );
-  const anyContentLengthHeaders: Entries = ourContentLength
+  const anyContentLengthHeaders: Entries = typeof ourContentLength === "number"
     ? [["content-length", `${ourContentLength}`]]
     : [];
   const anyLocationHeaders: Entries = isRedirectResponse(upstreamResponse)
